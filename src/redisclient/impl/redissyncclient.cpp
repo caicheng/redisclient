@@ -6,15 +6,15 @@
 #ifndef REDISCLIENT_REDISSYNCCLIENT_CPP
 #define REDISCLIENT_REDISSYNCCLIENT_CPP
 
-#include <boost/make_shared.hpp>
-#include <boost/bind.hpp>
+#include <memory>
+#include <functional>
 
 #include "../redissyncclient.h"
 
-RedisSyncClient::RedisSyncClient(boost::asio::io_service &ioService)
-    : pimpl(boost::make_shared<RedisClientImpl>(boost::ref(ioService)))
+RedisSyncClient::RedisSyncClient(asio::io_service &ioService)
+    : pimpl(std::make_shared<RedisClientImpl>(std::ref(ioService)))
 {
-    pimpl->errorHandler = boost::bind(&RedisClientImpl::defaulErrorHandler,
+    pimpl->errorHandler = std::bind(&RedisClientImpl::defaulErrorHandler,
                                       pimpl, _1);
 }
 
@@ -23,16 +23,16 @@ RedisSyncClient::~RedisSyncClient()
     pimpl->close();
 }
 
-bool RedisSyncClient::connect(const boost::asio::ip::tcp::endpoint &endpoint,
+bool RedisSyncClient::connect(const asio::ip::tcp::endpoint &endpoint,
         std::string &errmsg)
 {
-    boost::system::error_code ec;
+    asio::error_code ec;
 
     pimpl->socket.open(endpoint.protocol(), ec);
 
     if( !ec )
     {
-        pimpl->socket.set_option(boost::asio::ip::tcp::no_delay(true), ec);
+        pimpl->socket.set_option(asio::ip::tcp::no_delay(true), ec);
 
         if( !ec )
         {
@@ -52,17 +52,17 @@ bool RedisSyncClient::connect(const boost::asio::ip::tcp::endpoint &endpoint,
     }
 }
 
-bool RedisSyncClient::connect(const boost::asio::ip::address &address,
+bool RedisSyncClient::connect(const asio::ip::address &address,
         unsigned short port,
         std::string &errmsg)
 {
-    boost::asio::ip::tcp::endpoint endpoint(address, port);
+    asio::ip::tcp::endpoint endpoint(address, port);
 
     return connect(endpoint, errmsg);
 }
 
 void RedisSyncClient::installErrorHandler(
-        const boost::function<void(const std::string &)> &handler)
+        const std::function<void(const std::string &)> &handler)
 {
     pimpl->errorHandler = handler;
 }

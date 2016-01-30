@@ -7,7 +7,7 @@
 #ifndef REDISSYNCCLIENT_REDISBUFFER_H
 #define REDISSYNCCLIENT_REDISBUFFER_H
 
-#include <boost/noncopyable.hpp>
+#include <memory>
 
 #include <string>
 #include <list>

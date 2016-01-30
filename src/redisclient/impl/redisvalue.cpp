@@ -7,7 +7,6 @@
 #define REDISCLIENT_REDISVALUE_CPP
 
 #include <string.h>
-#include <boost/lexical_cast.hpp>
 #include "../redisvalue.h"
 
 RedisValue::RedisValue()
@@ -85,7 +84,7 @@ std::string RedisValue::inspect() const
     }
     else if( isInt() )
     {
-        return boost::lexical_cast<std::string>(toInt());
+        return std::to_string(toInt());
     }
     else if( isString() )
     {

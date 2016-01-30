@@ -6,9 +6,9 @@
 #ifndef REDISSYNCCLIENT_REDISCLIENT_H
 #define REDISSYNCCLIENT_REDISCLIENT_H
 
-#include <boost/asio/io_service.hpp>
-#include <boost/function.hpp>
-#include <boost/noncopyable.hpp>
+#include <asio/io_service.hpp>
+#include <functional>
+#include <memory>
 
 #include <string>
 #include <list>
@@ -20,25 +20,26 @@
 
 class RedisClientImpl;
 
-class RedisSyncClient : boost::noncopyable {
+class RedisSyncClient {
 public:
-    REDIS_CLIENT_DECL RedisSyncClient(boost::asio::io_service &ioService);
+	RedisSyncClient(const RedisSyncClient&) = delete;
+    REDIS_CLIENT_DECL RedisSyncClient(asio::io_service &ioService);
     REDIS_CLIENT_DECL ~RedisSyncClient();
 
     // Connect to redis server
     REDIS_CLIENT_DECL bool connect(
-            const boost::asio::ip::tcp::endpoint &endpoint,
+            const asio::ip::tcp::endpoint &endpoint,
             std::string &errmsg);
 
     // Connect to redis server
     REDIS_CLIENT_DECL bool connect(
-            const boost::asio::ip::address &address,
+            const asio::ip::address &address,
             unsigned short port,
             std::string &errmsg);
 
     // Set custom error handler. 
     REDIS_CLIENT_DECL void installErrorHandler(
-        const boost::function<void(const std::string &)> &handler);
+        const std::function<void(const std::string &)> &handler);
 
     // Execute command on Redis server.
     REDIS_CLIENT_DECL RedisValue command(const std::string &cmd);
@@ -88,7 +89,7 @@ protected:
     REDIS_CLIENT_DECL bool stateValid() const;
 
 private:
-    boost::shared_ptr<RedisClientImpl> pimpl;
+    std::shared_ptr<RedisClientImpl> pimpl;
 };
 
 #ifdef REDIS_CLIENT_HEADER_ONLY

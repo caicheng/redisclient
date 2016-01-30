@@ -8,7 +8,7 @@
 
 #include <sstream>
 #include <assert.h>
-
+#include <algorithm>
 #include "../redisparser.h"
 
 RedisParser::RedisParser()
