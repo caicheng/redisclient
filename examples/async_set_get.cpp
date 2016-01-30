@@ -1,9 +1,11 @@
 #include <string>
 #include <iostream>
-#include <boost/asio/ip/address.hpp>
-#include <boost/bind.hpp>
+#include <asio/ip/address.hpp>
+#include <functional>
 
-#include <redisclient/redisasyncclient.h>
+#include <redisasyncclient.h>
+
+using namespace std::placeholders;
 
 static const std::string redisKey = "unique-redis-key-example";
 static const std::string redisValue = "unique-redis-value";
@@ -11,7 +13,7 @@ static const std::string redisValue = "unique-redis-value";
 class Worker
 {
 public:
-    Worker(boost::asio::io_service &ioService, RedisAsyncClient &redisClient)
+    Worker(asio::io_service &ioService, RedisAsyncClient &redisClient)
         : ioService(ioService), redisClient(redisClient)
     {}
 
@@ -21,7 +23,7 @@ public:
     void stop();
 
 private:
-    boost::asio::io_service &ioService;
+    asio::io_service &ioService;
     RedisAsyncClient &redisClient;
 };
 
@@ -34,7 +36,7 @@ void Worker::onConnect(bool connected, const std::string &errorMessage)
     else
     {
         redisClient.command("SET",  redisKey, redisValue,
-                            boost::bind(&Worker::onSet, this, _1));
+                            std::bind(&Worker::onSet, this, _1));
     }
 }
 
@@ -44,7 +46,7 @@ void Worker::onSet(const RedisValue &value)
     if( value.toString() == "OK" )
     {
         redisClient.command("GET",  redisKey,
-                            boost::bind(&Worker::onGet, this, _1));
+                            std::bind(&Worker::onGet, this, _1));
     }
     else
     {
@@ -61,7 +63,7 @@ void Worker::onGet(const RedisValue &value)
     }
 
     redisClient.command("DEL", redisKey,
-                        boost::bind(&boost::asio::io_service::stop, boost::ref(ioService)));
+                        std::bind(&asio::io_service::stop, std::ref(ioService)));
 }
 
 
@@ -70,12 +72,12 @@ int main(int, char **)
     const char *address = "127.0.0.1";
     const int port = 6379;
 
-    boost::asio::io_service ioService;
+    asio::io_service ioService;
     RedisAsyncClient client(ioService);
     Worker worker(ioService, client);
-    boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(address), port);
+    asio::ip::tcp::endpoint endpoint(asio::ip::address::from_string(address), port);
 
-    client.asyncConnect(endpoint, boost::bind(&Worker::onConnect, &worker, _1, _2));
+    client.asyncConnect(endpoint, std::bind(&Worker::onConnect, &worker, _1, _2));
 
     ioService.run();
 

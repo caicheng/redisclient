@@ -1,16 +1,16 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/address.hpp>
-#include <redisclient/redissyncclient.h>
+#include <asio/io_service.hpp>
+#include <asio/ip/address.hpp>
+#include <redissyncclient.h>
 
 int main(int, char **)
 {
-    boost::asio::ip::address address = boost::asio::ip::address::from_string("127.0.0.1");
+    asio::ip::address address = asio::ip::address::from_string("127.0.0.1");
     const unsigned short port = 6379;
 
-    boost::asio::io_service ioService;
+    asio::io_service ioService;
     RedisSyncClient redis(ioService);
     std::string errmsg;
 

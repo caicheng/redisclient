@@ -1,9 +1,9 @@
 #include <string>
 #include <iostream>
-#include <boost/bind.hpp>
-#include <boost/asio/ip/address.hpp>
+#include <functional>
+#include <asio/ip/address.hpp>
 
-#include <redisclient/redisasyncclient.h>
+#include <redisasyncclient.h>
 
 static const std::string channelName = "unique-redis-channel-name-example";
 
@@ -11,7 +11,7 @@ static const std::string channelName = "unique-redis-channel-name-example";
 class Client
 {
 public:
-    Client(boost::asio::io_service &ioService)
+    Client(asio::io_service &ioService)
         : ioService(ioService)
     {}
 
@@ -26,7 +26,7 @@ public:
     }
 
 private:
-    boost::asio::io_service &ioService;
+    asio::io_service &ioService;
 };
 
 void publishHandler(RedisAsyncClient &publisher, const RedisValue &)
@@ -40,10 +40,10 @@ void publishHandler(RedisAsyncClient &publisher, const RedisValue &)
 
 int main(int, char **)
 {
-    boost::asio::ip::address address = boost::asio::ip::address::from_string("127.0.0.1");
+    asio::ip::address address = asio::ip::address::from_string("127.0.0.1");
     const unsigned short port = 6379;
 
-    boost::asio::io_service ioService;
+    asio::io_service ioService;
     RedisAsyncClient publisher(ioService);
     RedisAsyncClient subscriber(ioService);
     Client client(ioService);
@@ -65,8 +65,8 @@ int main(int, char **)
                 else
                 {
                     subscriber.subscribe(channelName,
-                            boost::bind(&Client::onMessage, &client, _1),
-                            boost::bind(&publishHandler, boost::ref(publisher), _1));
+                            std::bind(&Client::onMessage, &client, _1),
+						std::bind(&publishHandler, std::ref(publisher), _1));
                 }
             });
         }
